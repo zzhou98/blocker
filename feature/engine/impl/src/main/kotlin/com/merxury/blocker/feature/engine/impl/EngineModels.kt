@@ -31,6 +31,7 @@ data class EngineRuleItem(
     val rule: GeneralRule,
     val components: List<ComponentInfo>,
     val hasManagedChanges: Boolean = false,
+    val hasPersistentPolicy: Boolean = false,
 ) {
     val blockedCount: Int
         get() = components.count { !it.enabled() }

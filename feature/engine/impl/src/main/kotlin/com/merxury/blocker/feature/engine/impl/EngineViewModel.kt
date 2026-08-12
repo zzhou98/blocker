@@ -39,6 +39,7 @@ import com.merxury.blocker.core.ui.data.toErrorMessage
 import com.merxury.blocker.core.utils.PackageInfoDataSource
 import com.merxury.blocker.feature.engine.impl.journal.EngineJournalDao
 import com.merxury.blocker.feature.engine.impl.journal.EngineOperationEntity
+import com.merxury.blocker.feature.engine.impl.journal.EngineScanSnapshotEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -192,6 +193,10 @@ class EngineViewModel @Inject constructor(
             }
 
             val appByPackage = apps.associateBy { it.packageName }
+            val policyRuleIdsByPackage = apps.associate { app ->
+                app.packageName to journalDao.blockingPolicies(app.packageName)
+                    .mapTo(mutableSetOf()) { it.ruleId }
+            }
             val matchedRulesByPackage = mutableMapOf<String, MutableList<EngineRuleItem>>()
             val total = rules.size.coerceAtLeast(1)
 
@@ -212,6 +217,7 @@ class EngineViewModel @Inject constructor(
                                     hasManagedChanges = backupStore
                                         .ownedComponentNames(packageName, rule.id)
                                         .isNotEmpty(),
+                                    hasPersistentPolicy = rule.id in policyRuleIdsByPackage[packageName].orEmpty(),
                                 ),
                             )
                     }
@@ -241,6 +247,24 @@ class EngineViewModel @Inject constructor(
                         hasManagedChanges = hasManagedChanges,
                     )
                 }
+            }
+            val ruleHash = generalRuleRepository.getRuleHash().first()
+            catalog.forEach { appItem ->
+                val componentHash = appItem.engines
+                    .flatMap { engine -> engine.components.map { "${engine.rule.id}:${it.name}" } }
+                    .sorted()
+                    .joinToString(separator = "|")
+                    .hashCode()
+                    .toString()
+                journalDao.upsertSnapshot(
+                    EngineScanSnapshotEntity(
+                        packageName = appItem.app.packageName,
+                        versionCode = appItem.app.versionCode,
+                        lastUpdateTime = appItem.app.lastUpdateTime?.toEpochMilliseconds() ?: 0,
+                        componentHash = componentHash,
+                        ruleHash = ruleHash,
+                    ),
+                )
             }
             _uiState.emit(EngineUiState.Success(catalog))
 
