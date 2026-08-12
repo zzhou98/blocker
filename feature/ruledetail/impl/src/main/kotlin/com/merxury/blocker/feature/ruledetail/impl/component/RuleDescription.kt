@@ -62,6 +62,16 @@ fun RuleDescription(
             isTextSelectable = true,
         )
         InfoItemHeading(
+            heading = stringResource(id = ruledetailString.feature_ruledetail_api_risk_level),
+            description = listOf(
+                when (rule.safeToBlock) {
+                    true -> stringResource(id = ruledetailString.feature_ruledetail_api_risk_low)
+                    false -> stringResource(id = ruledetailString.feature_ruledetail_api_risk_caution)
+                    null -> stringResource(id = ruledetailString.feature_ruledetail_api_risk_unknown)
+                },
+            ),
+        )
+        InfoItemHeading(
             heading = stringResource(id = ruledetailString.feature_ruledetail_api_safe_to_block),
             description = listOf(
                 when (rule.safeToBlock) {

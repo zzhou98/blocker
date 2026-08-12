@@ -20,6 +20,10 @@
     <string name="feature_ruledetail_api_yes">是</string>
     <string name="feature_ruledetail_api_no">否</string>
     <string name="feature_ruledetail_api_unknown">未知</string>
+    <string name="feature_ruledetail_api_risk_level">风险等级</string>
+    <string name="feature_ruledetail_api_risk_low">低风险：该规则标记为可安全阻止。</string>
+    <string name="feature_ruledetail_api_risk_caution">谨慎：阻止后可能影响应用功能。</string>
+    <string name="feature_ruledetail_api_risk_unknown">未知：建议在阻止前先确认影响。</string>
     <string name="feature_ruledetail_api_no_description">无描述</string>
     <string name="feature_ruledetail_api_block_all_of_this_page">阻止本页所有组件</string>
     <string name="feature_ruledetail_api_enable_all_of_this_page">启用本页所有组件</string>

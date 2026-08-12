@@ -20,6 +20,10 @@
     <string name="feature_ruledetail_api_yes">Yes</string>
     <string name="feature_ruledetail_api_no">No</string>
     <string name="feature_ruledetail_api_unknown">Unknown</string>
+    <string name="feature_ruledetail_api_risk_level">Risk level</string>
+    <string name="feature_ruledetail_api_risk_low">Low risk — this rule is marked safe to block.</string>
+    <string name="feature_ruledetail_api_risk_caution">Caution — blocking may affect app functions.</string>
+    <string name="feature_ruledetail_api_risk_unknown">Unknown — confirm the effect before blocking.</string>
     <string name="feature_ruledetail_api_no_description">No description</string>
     <string name="feature_ruledetail_api_block_all_of_this_page">Block all of this page</string>
     <string name="feature_ruledetail_api_enable_all_of_this_page">Enable all of this page</string>

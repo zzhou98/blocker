@@ -20,6 +20,10 @@
     <string name="feature_ruledetail_api_yes">是</string>
     <string name="feature_ruledetail_api_no">否</string>
     <string name="feature_ruledetail_api_unknown">未知</string>
+    <string name="feature_ruledetail_api_risk_level">風險等級</string>
+    <string name="feature_ruledetail_api_risk_low">低風險：此規則標示為可安全封鎖。</string>
+    <string name="feature_ruledetail_api_risk_caution">謹慎：封鎖後可能影響應用程式功能。</string>
+    <string name="feature_ruledetail_api_risk_unknown">未知：建議在封鎖前先確認影響。</string>
     <string name="feature_ruledetail_api_no_description">無描述</string>
     <string name="feature_ruledetail_api_block_all_of_this_page">阻止本頁所有組件</string>
     <string name="feature_ruledetail_api_enable_all_of_this_page">啟用本頁所有組件</string>
