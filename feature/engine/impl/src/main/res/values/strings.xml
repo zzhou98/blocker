@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_engine_impl_title">Engines</string>
+    <string name="feature_engine_impl_no_apps">No applications with manageable engines</string>
+    <string name="feature_engine_impl_no_rules">No engines currently match this application. Engine-managed changes can still be restored from the menu.</string>
+    <string name="feature_engine_impl_app_summary">%1$d engines 路 %2$d recommended</string>
+    <string name="feature_engine_impl_app_summary_restore_pending">Engine changes pending restore</string>
+    <string name="feature_engine_impl_recommended">Recommended to disable</string>
+    <string name="feature_engine_impl_caution">Handle with caution</string>
+    <string name="feature_engine_impl_safe">Recommended</string>
+    <string name="feature_engine_impl_not_recommended">Not recommended</string>
+    <string name="feature_engine_impl_unknown">Caution</string>
+    <string name="feature_engine_impl_component_status">%1$s 路 %2$d components 路 %3$d blocked</string>
+    <string name="feature_engine_impl_disable_recommended">Disable recommended</string>
+    <string name="feature_engine_impl_restore_changes">Restore Engine changes</string>
+    <string name="feature_engine_impl_unsafe_confirm">This rule is not marked safe to block. Disabling its matched components may affect application functions. Continue?</string>
+    <string name="feature_engine_impl_force_enable_confirm">Engine has no restore record for this rule. Continuing will enable matched components that are currently blocked outside Engine, except components still owned by another Engine rule. This may override manual blocks made elsewhere. Continue?</string>
+    <string name="feature_engine_impl_disable_recommended_confirm">Disable %2$d rules marked safe to block in %1$s? Rules without a safe-to-block mark will not be changed.</string>
+    <string name="feature_engine_impl_restore_confirm">Restore only the component states changed by Engine for %1$s? Existing blocks that predate Engine will be preserved.</string>
+</resources>

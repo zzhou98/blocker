@@ -99,6 +99,8 @@ dependencies {
     implementation(projects.feature.debloater.impl)
     implementation(projects.feature.generalrule.api)
     implementation(projects.feature.generalrule.impl)
+    implementation(projects.feature.engine.api)
+    implementation(projects.feature.engine.impl)
     implementation(projects.feature.globalifwrule.api)
     implementation(projects.feature.globalifwrule.impl)
     implementation(projects.feature.ifwrule.api)

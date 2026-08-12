@@ -23,6 +23,7 @@ import com.merxury.blocker.core.designsystem.icon.BlockerIcons
 import com.merxury.blocker.core.designsystem.icon.Icon
 import com.merxury.blocker.feature.applist.api.navigation.AppListNavKey
 import com.merxury.blocker.feature.debloator.api.navigation.DebloaterNavKey
+import com.merxury.blocker.feature.engine.api.navigation.EngineNavKey
 import com.merxury.blocker.feature.generalrule.api.navigation.GeneralRuleNavKey
 import com.merxury.blocker.feature.globalifwrule.api.navigation.GlobalIfwRuleNavKey
 import com.merxury.blocker.feature.search.api.navigation.SearchNavKey
@@ -51,6 +52,12 @@ val RULE = TopLevelNavItem(
     iconTextId = R.string.sdk_trackers,
     titleTextId = R.string.sdk_trackers,
 )
+val ENGINE = TopLevelNavItem(
+    selectedIcon = Icon.ImageVectorIcon(BlockerIcons.DesignService),
+    unselectedIcon = Icon.ImageVectorIcon(BlockerIcons.DesignService),
+    iconTextId = R.string.engine,
+    titleTextId = R.string.engine,
+)
 val SHARE_FILTER = TopLevelNavItem(
     selectedIcon = Icon.DrawableResourceIcon(BlockerIcons.ShareOff),
     unselectedIcon = Icon.DrawableResourceIcon(BlockerIcons.ShareOff),
@@ -73,6 +80,7 @@ val SEARCH = TopLevelNavItem(
 val TOP_LEVEL_NAV_ITEMS = mapOf(
     AppListNavKey() to APP,
     GeneralRuleNavKey() to RULE,
+    EngineNavKey to ENGINE,
     DebloaterNavKey to SHARE_FILTER,
     GlobalIfwRuleNavKey to FIREWALL,
     SearchNavKey() to SEARCH,
