@@ -18,6 +18,7 @@
     <string name="apps">應用</string>
     <string name="search">搜索</string>
     <string name="sdk_trackers">SDK/跟踪器</string>
+    <string name="trackers">追蹤器</string>
     <string name="engine">引擎</string>
     <string name="feature_apppurification_title">應用淨化</string>
     <string name="no_permission_hint">無法獲取權限，應用可能無法正常工作。</string>

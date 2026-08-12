@@ -72,6 +72,7 @@ import com.merxury.blocker.core.designsystem.theme.BlockerTheme
 import com.merxury.blocker.core.model.data.AppItem
 import com.merxury.blocker.core.model.data.ComponentInfo
 import com.merxury.blocker.core.model.data.GeneralRule
+import com.merxury.blocker.core.model.ComponentType
 import com.merxury.blocker.core.ui.R.string as uiString
 import com.merxury.blocker.core.ui.TrackScreenViewEvent
 import com.merxury.blocker.core.ui.applist.AppIcon
@@ -193,6 +194,7 @@ fun EngineScreen(
                     if (selectedApp.engines.isEmpty()) {
                         EmptyScreen(textRes = string.feature_engine_impl_no_rules)
                     } else {
+                        EngineComponentSummary(appItem = selectedApp)
                         EngineRuleList(
                             appItem = selectedApp,
                             isProcessing = isProcessing,
@@ -207,7 +209,7 @@ fun EngineScreen(
                                         forceEnableRuleId = engine.rule.id
                                     }
 
-                                    engine.rule.safeToBlock == true -> {
+                                    engine.riskLevel == EngineRiskLevel.SAFE -> {
                                         onDisableEngine(packageName, engine.rule.id)
                                     }
 
@@ -227,7 +229,13 @@ fun EngineScreen(
     if (unsafeRule != null) {
         BlockerWarningAlertDialog(
             title = unsafeRule.rule.name,
-            text = stringResource(id = string.feature_engine_impl_unsafe_confirm),
+            text = stringResource(
+                id = if (unsafeRule.riskLevel == EngineRiskLevel.HIGH_RISK) {
+                    string.feature_engine_impl_high_risk_confirm
+                } else {
+                    string.feature_engine_impl_unsafe_confirm
+                },
+            ),
             onDismissRequest = { unsafeRuleId = null },
             onConfirmRequest = {
                 unsafeRuleId = null
@@ -278,6 +286,28 @@ fun EngineScreen(
     }
 
     TrackScreenViewEvent(screenName = "EngineScreen")
+}
+
+@Composable
+private fun EngineComponentSummary(
+    appItem: EngineAppItem,
+    modifier: Modifier = Modifier,
+) {
+    BlockerBodyMediumText(
+        text = stringResource(
+            id = string.feature_engine_impl_component_summary,
+            appItem.engines.size,
+            appItem.componentCount,
+            appItem.componentCount(ComponentType.SERVICE),
+            appItem.componentCount(ComponentType.RECEIVER),
+            appItem.componentCount(ComponentType.PROVIDER),
+            appItem.componentCount(ComponentType.ACTIVITY),
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+    )
 }
 
 @Composable
@@ -396,8 +426,9 @@ private fun EngineRuleList(
     onToggle: (EngineRuleItem, Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val recommended = appItem.engines.filter { it.rule.safeToBlock == true }
-    val caution = appItem.engines.filterNot { it.rule.safeToBlock == true }
+    val recommended = appItem.engines.filter { it.riskLevel == EngineRiskLevel.SAFE }
+    val caution = appItem.engines.filter { it.riskLevel == EngineRiskLevel.CAUTION }
+    val highRisk = appItem.engines.filter { it.riskLevel == EngineRiskLevel.HIGH_RISK }
     val listState = rememberLazyListState()
     val totalItems = appItem.engines.size
     val scrollbarState = listState.scrollbarState(itemsAvailable = totalItems)
@@ -429,6 +460,19 @@ private fun EngineRuleList(
                     RuleItemHeader(title = stringResource(id = string.feature_engine_impl_caution))
                 }
                 items(caution, key = { it.rule.id }) { engine ->
+                    EngineRuleItemRow(
+                        engine = engine,
+                        isProcessing = isProcessing,
+                        onToggle = onToggle,
+                    )
+                }
+            }
+            if (highRisk.isNotEmpty()) {
+                if (recommended.isNotEmpty() || caution.isNotEmpty()) {
+                    item { HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp)) }
+                }
+                item { RuleItemHeader(title = stringResource(id = string.feature_engine_impl_high_risk)) }
+                items(highRisk, key = { it.rule.id }) { engine ->
                     EngineRuleItemRow(
                         engine = engine,
                         isProcessing = isProcessing,
@@ -483,10 +527,10 @@ private fun EngineRuleItemRow(
             engine.rule.company?.takeIf { it.isNotBlank() }?.let {
                 BlockerBodyMediumText(text = it)
             }
-            val safetyText = when (engine.rule.safeToBlock) {
-                true -> stringResource(id = string.feature_engine_impl_safe)
-                false -> stringResource(id = string.feature_engine_impl_not_recommended)
-                null -> stringResource(id = string.feature_engine_impl_unknown)
+            val safetyText = when (engine.riskLevel) {
+                EngineRiskLevel.SAFE -> stringResource(id = string.feature_engine_impl_safe)
+                EngineRiskLevel.CAUTION -> stringResource(id = string.feature_engine_impl_caution)
+                EngineRiskLevel.HIGH_RISK -> stringResource(id = string.feature_engine_impl_high_risk)
             }
             BlockerBodyMediumText(
                 text = stringResource(

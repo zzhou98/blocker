@@ -330,7 +330,7 @@ class EngineViewModel @Inject constructor(
             val app = catalog.firstOrNull { it.app.packageName == packageName }
                 ?: return@runControlOperation
             app.engines
-                .filter { it.rule.safeToBlock == true && it.isEnabled }
+                .filter { it.riskLevel == EngineRiskLevel.SAFE && it.isEnabled }
                 .forEach { disableEngineInternal(it) }
         }
     }

@@ -49,7 +49,8 @@ val APP = TopLevelNavItem(
 val RULE = TopLevelNavItem(
     selectedIcon = Icon.ImageVectorIcon(BlockerIcons.GeneralRule),
     unselectedIcon = Icon.ImageVectorIcon(BlockerIcons.GeneralRule),
-    iconTextId = R.string.sdk_trackers,
+    // Keep the compact navigation label readable; the destination title remains SDK/Trackers.
+    iconTextId = R.string.trackers,
     titleTextId = R.string.sdk_trackers,
 )
 val ENGINE = TopLevelNavItem(

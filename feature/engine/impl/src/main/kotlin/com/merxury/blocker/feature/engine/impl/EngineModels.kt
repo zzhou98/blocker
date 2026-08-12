@@ -13,7 +13,14 @@ package com.merxury.blocker.feature.engine.impl
 import com.merxury.blocker.core.model.data.AppItem
 import com.merxury.blocker.core.model.data.ComponentInfo
 import com.merxury.blocker.core.model.data.GeneralRule
+import com.merxury.blocker.core.model.ComponentType
 import com.merxury.blocker.core.ui.data.UiMessage
+
+enum class EngineRiskLevel {
+    SAFE,
+    CAUTION,
+    HIGH_RISK,
+}
 
 data class EngineAppItem(
     val app: AppItem,
@@ -24,7 +31,14 @@ data class EngineAppItem(
         get() = engines.count { it.rule.safeToBlock == true }
 
     val enabledRecommendedCount: Int
-        get() = engines.count { it.rule.safeToBlock == true && it.isEnabled }
+        get() = engines.count { it.riskLevel == EngineRiskLevel.SAFE && it.isEnabled }
+
+    val componentCount: Int
+        get() = engines.sumOf { it.components.size }
+
+    fun componentCount(type: ComponentType): Int = engines.sumOf { engine ->
+        engine.components.count { it.type == type }
+    }
 }
 
 data class EngineRuleItem(
@@ -41,6 +55,29 @@ data class EngineRuleItem(
 
     val isFullyBlocked: Boolean
         get() = components.isNotEmpty() && blockedCount == components.size
+
+    /**
+     * A safe-to-block rule is only a first-level signal. Android entry-point components can make
+     * an otherwise benign SDK essential to an app, so they are never included in bulk blocking.
+     */
+    val riskLevel: EngineRiskLevel
+        get() = when {
+            components.any { it.isCoreEntryPoint() } -> EngineRiskLevel.HIGH_RISK
+            rule.safeToBlock == true -> EngineRiskLevel.SAFE
+            else -> EngineRiskLevel.CAUTION
+        }
+}
+
+private fun ComponentInfo.isCoreEntryPoint(): Boolean {
+    val identifier = "$name $simpleName".lowercase()
+    return type == ComponentType.PROVIDER ||
+        identifier.contains("mainactivity") ||
+        identifier.contains("accessibilityservice") ||
+        identifier.contains("notificationlistener") ||
+        identifier.contains("vpnservice") ||
+        identifier.contains("inputmethod") ||
+        identifier.contains("deviceadmin") ||
+        identifier.contains("accountauthenticator")
 }
 
 sealed interface EngineUiState {

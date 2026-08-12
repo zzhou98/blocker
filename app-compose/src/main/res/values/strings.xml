@@ -19,6 +19,7 @@
     <string name="apps">Apps</string>
     <string name="search">Search</string>
     <string name="sdk_trackers">SDK/Trackers</string>
+    <string name="trackers">Trackers</string>
     <string name="engine">Engines</string>
     <string name="feature_apppurification_title">App Purification</string>
     <string name="firewall">Firewall</string>
