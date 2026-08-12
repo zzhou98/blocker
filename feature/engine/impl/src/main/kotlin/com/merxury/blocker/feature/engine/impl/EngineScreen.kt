@@ -58,6 +58,7 @@ import com.merxury.blocker.core.designsystem.component.BlockerAppTopBarMenu
 import com.merxury.blocker.core.designsystem.component.BlockerBodyLargeText
 import com.merxury.blocker.core.designsystem.component.BlockerBodyMediumText
 import com.merxury.blocker.core.designsystem.component.BlockerErrorAlertDialog
+import com.merxury.blocker.core.designsystem.component.BlockerFilterChip
 import com.merxury.blocker.core.designsystem.component.BlockerLoadingWheel
 import com.merxury.blocker.core.designsystem.component.BlockerTopAppBar
 import com.merxury.blocker.core.designsystem.component.BlockerTopAppBarWithProgress
@@ -115,6 +116,7 @@ fun EngineScreen(
         onForceEnableEngine = viewModel::forceEnableEngine,
         onDisableRecommended = viewModel::disableRecommended,
         onRestoreManagedChanges = viewModel::restoreManagedChanges,
+        onPersistentPolicyChange = viewModel::setPersistentPolicy,
     )
 
     if (errorState != null) {
@@ -139,6 +141,7 @@ fun EngineScreen(
     onForceEnableEngine: (String, Int) -> Unit = { _, _ -> },
     onDisableRecommended: (String) -> Unit = {},
     onRestoreManagedChanges: (String) -> Unit = {},
+    onPersistentPolicyChange: (String, Int, Boolean) -> Unit = { _, _, _ -> },
 ) {
     val selectedPackageName = selectedApp?.app?.packageName
     var unsafeRuleId by rememberSaveable(selectedPackageName) { mutableStateOf<Int?>(null) }
@@ -217,6 +220,13 @@ fun EngineScreen(
                                         unsafeRuleId = engine.rule.id
                                     }
                                 }
+                            },
+                            onPersistentPolicyChange = { engine, enabled ->
+                                onPersistentPolicyChange(
+                                    selectedApp.app.packageName,
+                                    engine.rule.id,
+                                    enabled,
+                                )
                             },
                         )
                     }
@@ -424,6 +434,7 @@ private fun EngineRuleList(
     appItem: EngineAppItem,
     isProcessing: Boolean,
     onToggle: (EngineRuleItem, Boolean) -> Unit,
+    onPersistentPolicyChange: (EngineRuleItem, Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val recommended = appItem.engines.filter { it.riskLevel == EngineRiskLevel.SAFE }
@@ -447,6 +458,7 @@ private fun EngineRuleList(
                         engine = engine,
                         isProcessing = isProcessing,
                         onToggle = onToggle,
+                        onPersistentPolicyChange = onPersistentPolicyChange,
                     )
                 }
             }
@@ -464,6 +476,7 @@ private fun EngineRuleList(
                         engine = engine,
                         isProcessing = isProcessing,
                         onToggle = onToggle,
+                        onPersistentPolicyChange = onPersistentPolicyChange,
                     )
                 }
             }
@@ -477,6 +490,7 @@ private fun EngineRuleList(
                         engine = engine,
                         isProcessing = isProcessing,
                         onToggle = onToggle,
+                        onPersistentPolicyChange = onPersistentPolicyChange,
                     )
                 }
             }
@@ -502,6 +516,7 @@ private fun EngineRuleItemRow(
     engine: EngineRuleItem,
     isProcessing: Boolean,
     onToggle: (EngineRuleItem, Boolean) -> Unit,
+    onPersistentPolicyChange: (EngineRuleItem, Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -540,6 +555,16 @@ private fun EngineRuleItemRow(
                     engine.blockedCount,
                 ),
             )
+            if (engine.riskLevel == EngineRiskLevel.SAFE) {
+                BlockerFilterChip(
+                    selected = engine.hasPersistentPolicy,
+                    onSelectedChange = { onPersistentPolicyChange(engine, it) },
+                    enabled = !isProcessing,
+                    label = {
+                        Text(stringResource(id = string.feature_engine_impl_persistent_policy))
+                    },
+                )
+            }
         }
         Spacer(modifier = Modifier.width(12.dp))
         Switch(

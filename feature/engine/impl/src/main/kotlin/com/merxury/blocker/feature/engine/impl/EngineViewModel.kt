@@ -39,6 +39,7 @@ import com.merxury.blocker.core.ui.data.toErrorMessage
 import com.merxury.blocker.core.utils.PackageInfoDataSource
 import com.merxury.blocker.feature.engine.impl.journal.EngineJournalDao
 import com.merxury.blocker.feature.engine.impl.journal.EngineOperationEntity
+import com.merxury.blocker.feature.engine.impl.journal.EnginePolicyEntity
 import com.merxury.blocker.feature.engine.impl.journal.EngineScanSnapshotEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -332,6 +333,36 @@ class EngineViewModel @Inject constructor(
             app.engines
                 .filter { it.riskLevel == EngineRiskLevel.SAFE && it.isEnabled }
                 .forEach { disableEngineInternal(it) }
+        }
+    }
+
+    /**
+     * Persists an app-scoped desired block state. Turning it on also applies the safe rule now;
+     * turning it off deliberately keeps current component state untouched, so removing a policy
+     * can never unexpectedly re-enable a component that was blocked by the user or another rule.
+     */
+    fun setPersistentPolicy(packageName: String, ruleId: Int, enabled: Boolean) {
+        runControlOperation(packageName) {
+            val engine = findEngine(packageName, ruleId) ?: return@runControlOperation
+            if (enabled) {
+                check(engine.riskLevel == EngineRiskLevel.SAFE) {
+                    "Only safe Engine rules can be added as persistent policies"
+                }
+                journalDao.upsertPolicy(
+                    EnginePolicyEntity(
+                        scope = "PACKAGE",
+                        packageName = packageName,
+                        ruleId = ruleId,
+                        mode = "BLOCK",
+                        autoApply = true,
+                    ),
+                )
+                if (engine.isEnabled) {
+                    disableEngineInternal(engine)
+                }
+            } else {
+                journalDao.deletePolicy("PACKAGE", packageName, ruleId)
+            }
         }
     }
 
@@ -826,6 +857,8 @@ class EngineViewModel @Inject constructor(
         val currentByName = componentRepository.getComponentList(packageName)
             .first()
             .associateBy { it.name }
+        val policyRuleIds = journalDao.blockingPolicies(packageName)
+            .mapTo(mutableSetOf()) { it.ruleId }
 
         catalog = catalog.mapNotNull { appItem ->
             if (appItem.app.packageName != packageName) return@mapNotNull appItem
@@ -839,6 +872,7 @@ class EngineViewModel @Inject constructor(
                         hasManagedChanges = backupStore
                             .ownedComponentNames(packageName, engine.rule.id)
                             .isNotEmpty(),
+                        hasPersistentPolicy = engine.rule.id in policyRuleIds,
                     )
                 }
             }
