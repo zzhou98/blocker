@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.SnackbarDuration.Short
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.merxury.blocker.core.analytics.LocalAnalyticsHelper
 import com.merxury.blocker.core.designsystem.component.BlockerAppTopBarMenu
 import com.merxury.blocker.core.designsystem.component.BlockerErrorAlertDialog
+import com.merxury.blocker.core.designsystem.component.BlockerScrollableTabRow
+import com.merxury.blocker.core.designsystem.component.BlockerTab
 import com.merxury.blocker.core.designsystem.component.BlockerTopAppBarWithProgress
 import com.merxury.blocker.core.designsystem.component.BlockerWarningAlertDialog
 import com.merxury.blocker.core.designsystem.component.DropDownMenuItem
@@ -109,6 +112,7 @@ fun GeneralRulesScreen(
 ) {
     var showBlockAllDialog by rememberSaveable { mutableStateOf(false) }
     var showEnableAllDialog by rememberSaveable { mutableStateOf(false) }
+    var selectedCategory by rememberSaveable { mutableStateOf(GeneralRuleCategory.ALL) }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
@@ -137,16 +141,19 @@ fun GeneralRulesScreen(
                 LoadingScreen()
             }
 
-            is GeneralRuleUiState.Success -> GeneralRulesList(
-                matchedRules = uiState.matchedRules,
-                unmatchedRules = uiState.unmatchedRules,
+            is GeneralRuleUiState.Success -> Column(modifier = Modifier.weight(1F)) {
+                GeneralRuleCategoryTabs(selectedCategory) { selectedCategory = it }
+                GeneralRulesList(
+                    matchedRules = uiState.matchedRules.filterByCategory(selectedCategory),
+                    unmatchedRules = uiState.unmatchedRules.filterByCategory(selectedCategory),
                 highlightSelectedRule = highlightSelectedRule,
                 selectedRuleId = uiState.selectedRuleId,
                 onClick = { id ->
                     navigateToRuleDetail(id)
                     analyticsHelper.logGeneralRuleClicked(id)
                 },
-            )
+                )
+            }
 
             is GeneralRuleUiState.Error -> ErrorScreen(error = uiState.error)
         }
@@ -174,6 +181,36 @@ fun GeneralRulesScreen(
         )
     }
     TrackScreenViewEvent(screenName = "GeneralRulesScreen")
+}
+
+@Composable
+private fun GeneralRuleCategoryTabs(
+    selectedCategory: GeneralRuleCategory,
+    onCategorySelected: (GeneralRuleCategory) -> Unit,
+) {
+    val categories = GeneralRuleCategory.entries
+    BlockerScrollableTabRow(selectedTabIndex = categories.indexOf(selectedCategory)) {
+        categories.forEach { category ->
+            BlockerTab(
+                selected = category == selectedCategory,
+                onClick = { onCategorySelected(category) },
+                text = { Text(stringResource(category.labelRes())) },
+            )
+        }
+    }
+}
+
+private fun List<GeneralRule>.filterByCategory(category: GeneralRuleCategory): List<GeneralRule> =
+    if (category == GeneralRuleCategory.ALL) this else filter { it.category() == category }
+
+private fun GeneralRuleCategory.labelRes(): Int = when (this) {
+    GeneralRuleCategory.ALL -> generalruleString.feature_generalrule_api_category_all
+    GeneralRuleCategory.ADVERTISING -> generalruleString.feature_generalrule_api_category_advertising
+    GeneralRuleCategory.ANALYTICS -> generalruleString.feature_generalrule_api_category_analytics
+    GeneralRuleCategory.PUSH -> generalruleString.feature_generalrule_api_category_push
+    GeneralRuleCategory.SOCIAL -> generalruleString.feature_generalrule_api_category_social
+    GeneralRuleCategory.AUTH -> generalruleString.feature_generalrule_api_category_auth
+    GeneralRuleCategory.OTHER -> generalruleString.feature_generalrule_api_category_other
 }
 
 @Composable

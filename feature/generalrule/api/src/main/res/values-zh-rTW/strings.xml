@@ -20,4 +20,11 @@
     <string name="feature_generalrule_api_enable_all_matched">啟用所有匹配項</string>
     <string name="feature_generalrule_api_block_all_confirmation">此操作將停用所有應用程式中被 SDK/追蹤器規則匹配到的元件。是否繼續？</string>
     <string name="feature_generalrule_api_enable_all_confirmation">此操作將重新啟用所有應用程式中被 SDK/追蹤器規則匹配到的元件。是否繼續？</string>
+    <string name="feature_generalrule_api_category_all">全部</string>
+    <string name="feature_generalrule_api_category_advertising">廣告</string>
+    <string name="feature_generalrule_api_category_analytics">統計</string>
+    <string name="feature_generalrule_api_category_push">推送</string>
+    <string name="feature_generalrule_api_category_social">社交</string>
+    <string name="feature_generalrule_api_category_auth">登入</string>
+    <string name="feature_generalrule_api_category_other">其他</string>
 </resources>
