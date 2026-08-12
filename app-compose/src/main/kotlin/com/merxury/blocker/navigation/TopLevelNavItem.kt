@@ -80,8 +80,8 @@ val SEARCH = TopLevelNavItem(
 val TOP_LEVEL_NAV_ITEMS = mapOf(
     AppListNavKey() to APP,
     GeneralRuleNavKey() to RULE,
-    EngineNavKey to ENGINE,
     DebloaterNavKey to SHARE_FILTER,
     GlobalIfwRuleNavKey to FIREWALL,
     SearchNavKey() to SEARCH,
+    EngineNavKey to ENGINE,
 )

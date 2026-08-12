@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_engine_impl_title">引擎</string>
+    <string name="feature_engine_impl_no_apps">未检测到可管理引擎的应用</string>
+    <string name="feature_engine_impl_no_rules">当前没有匹配的引擎规则。仍可通过右上角菜单恢复此前由“引擎”修改的组件。</string>
+    <string name="feature_engine_impl_app_summary">%1$d 个引擎 · %2$d 个建议关闭</string>
+    <string name="feature_engine_impl_app_summary_restore_pending">有待恢复的引擎更改</string>
+    <string name="feature_engine_impl_recommended">建议关闭</string>
+    <string name="feature_engine_impl_caution">请谨慎处理</string>
+    <string name="feature_engine_impl_safe">建议关闭</string>
+    <string name="feature_engine_impl_not_recommended">不建议关闭</string>
+    <string name="feature_engine_impl_unknown">请谨慎处理</string>
+    <string name="feature_engine_impl_component_status">%1$s · %2$d 个组件 · 已关闭 %3$d 个</string>
+    <string name="feature_engine_impl_disable_recommended">关闭推荐项</string>
+    <string name="feature_engine_impl_restore_changes">恢复引擎更改</string>
+    <string name="feature_engine_impl_unsafe_confirm">此规则未标记为可安全关闭。关闭其匹配组件可能影响应用功能，是否继续？</string>
+    <string name="feature_engine_impl_force_enable_confirm">“引擎”没有此规则的恢复记录。继续后，只会启用当前未被其他“引擎”规则管理、但已关闭的匹配组件；这可能覆盖你在其他页面手动进行的禁用。是否继续？</string>
+    <string name="feature_engine_impl_disable_recommended_confirm">关闭 %1$s 中 %2$d 个明确标记为可安全关闭的项？未标记为安全的项不会被修改。</string>
+    <string name="feature_engine_impl_restore_confirm">仅恢复“引擎”曾为 %1$s 修改过的组件状态；使用“引擎”前已有的禁用状态会被保留。是否继续？</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_engine_impl_title">引擎</string>
+    <string name="feature_engine_impl_no_apps">未偵測到可管理引擎的應用程式</string>
+    <string name="feature_engine_impl_no_rules">目前沒有相符的引擎規則。仍可透過右上角選單還原先前由「引擎」修改的元件。</string>
+    <string name="feature_engine_impl_app_summary">%1$d 個引擎 · %2$d 個建議關閉</string>
+    <string name="feature_engine_impl_app_summary_restore_pending">有待還原的引擎變更</string>
+    <string name="feature_engine_impl_recommended">建議關閉</string>
+    <string name="feature_engine_impl_caution">請謹慎處理</string>
+    <string name="feature_engine_impl_safe">建議關閉</string>
+    <string name="feature_engine_impl_not_recommended">不建議關閉</string>
+    <string name="feature_engine_impl_unknown">請謹慎處理</string>
+    <string name="feature_engine_impl_component_status">%1$s · %2$d 個元件 · 已關閉 %3$d 個</string>
+    <string name="feature_engine_impl_disable_recommended">關閉建議項目</string>
+    <string name="feature_engine_impl_restore_changes">還原引擎變更</string>
+    <string name="feature_engine_impl_unsafe_confirm">此規則未標示為可安全關閉。關閉其相符元件可能影響應用程式功能，是否繼續？</string>
+    <string name="feature_engine_impl_force_enable_confirm">「引擎」沒有此規則的還原記錄。繼續後，只會啟用目前未被其他「引擎」規則管理、但已關閉的相符元件；這可能覆蓋你在其他頁面手動進行的停用。是否繼續？</string>
+    <string name="feature_engine_impl_disable_recommended_confirm">關閉 %1$s 中 %2$d 個明確標示為可安全關閉的項目？未標示為安全的項目不會被修改。</string>
+    <string name="feature_engine_impl_restore_confirm">僅還原「引擎」曾為 %1$s 修改過的元件狀態；使用「引擎」前已有的停用狀態會被保留。是否繼續？</string>
+</resources>
