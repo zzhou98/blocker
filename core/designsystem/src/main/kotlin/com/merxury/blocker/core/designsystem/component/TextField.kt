@@ -58,6 +58,7 @@ fun BlockerSearchTextField(
     searchQuery: String = "",
     placeholder: @Composable (() -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+    autoFocus: Boolean = false,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
@@ -127,8 +128,10 @@ fun BlockerSearchTextField(
         ),
         shape = RoundedCornerShape(56.dp),
     )
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) {
+            focusRequester.requestFocus()
+        }
     }
 }
 
