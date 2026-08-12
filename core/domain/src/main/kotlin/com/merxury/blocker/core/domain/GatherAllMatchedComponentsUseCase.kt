@@ -39,8 +39,18 @@ class GatherAllMatchedComponentsUseCase @Inject constructor(
 ) {
 
     operator fun invoke(): Flow<List<ComponentInfo>> = flow {
+        emit(gather(generalRuleRepository.getGeneralRules().first()))
+    }.flowOn(ioDispatcher)
+
+    /** Gathers only components belonging to the supplied subset of SDK rules. */
+    operator fun invoke(rules: List<com.merxury.blocker.core.model.data.GeneralRule>): Flow<List<ComponentInfo>> = flow {
+        emit(gather(rules))
+    }.flowOn(ioDispatcher)
+
+    private suspend fun gather(
+        rules: List<com.merxury.blocker.core.model.data.GeneralRule>,
+    ): List<ComponentInfo> {
         val userData = userDataRepository.userData.first()
-        val rules = generalRuleRepository.getGeneralRules().first()
         val seenKeys = mutableSetOf<String>()
         val allComponents = mutableListOf<ComponentInfo>()
         rules.filter { it.matchedAppCount > 0 }
@@ -68,7 +78,6 @@ class GatherAllMatchedComponentsUseCase @Inject constructor(
                 }
             allComponents.removeAll { it.packageName in packagesToRemove }
         }
-        emit(allComponents.toList())
+        return allComponents.toList()
     }
-        .flowOn(ioDispatcher)
 }

@@ -104,11 +104,15 @@ class GeneralRulesViewModel @AssistedInject constructor(
         loadSelectedRule()
     }
 
-    fun controlAllComponents(enable: Boolean, action: suspend (Int, Int) -> Unit) {
+    fun controlRules(
+        rules: List<GeneralRule>,
+        enable: Boolean,
+        action: suspend (Int, Int) -> Unit,
+    ) {
         controlJob?.cancel()
         controlJob = viewModelScope.launch {
             analyticsHelper.logControlAllSdksClicked(newState = enable)
-            val list = gatherAllMatchedComponents().first()
+            val list = gatherAllMatchedComponents(rules.filter { it.matchedAppCount > 0 }).first()
             if (list.isEmpty()) return@launch
             try {
                 _isProcessing.value = true

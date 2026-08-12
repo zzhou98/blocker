@@ -118,6 +118,8 @@ fun EngineScreen(
         onRestoreManagedChanges = viewModel::restoreManagedChanges,
         onPersistentPolicyChange = viewModel::setPersistentPolicy,
         onGlobalPersistentPolicyChange = viewModel::setGlobalPersistentPolicy,
+        onDisableAllRecommended = viewModel::disableAllRecommended,
+        onRestoreAllDefaults = viewModel::restoreAllDefaults,
     )
 
     if (errorState != null) {
@@ -144,12 +146,16 @@ fun EngineScreen(
     onRestoreManagedChanges: (String) -> Unit = {},
     onPersistentPolicyChange: (String, Int, Boolean) -> Unit = { _, _, _ -> },
     onGlobalPersistentPolicyChange: (Int, Boolean) -> Unit = { _, _ -> },
+    onDisableAllRecommended: () -> Unit = {},
+    onRestoreAllDefaults: () -> Unit = {},
 ) {
     val selectedPackageName = selectedApp?.app?.packageName
     var unsafeRuleId by rememberSaveable(selectedPackageName) { mutableStateOf<Int?>(null) }
     var forceEnableRuleId by rememberSaveable(selectedPackageName) { mutableStateOf<Int?>(null) }
     var showDisableRecommendedDialog by rememberSaveable(selectedPackageName) { mutableStateOf(false) }
     var showRestoreDialog by rememberSaveable(selectedPackageName) { mutableStateOf(false) }
+    var showDisableAllRecommendedDialog by rememberSaveable { mutableStateOf(false) }
+    var showRestoreAllDialog by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -160,6 +166,18 @@ fun EngineScreen(
             BlockerTopAppBarWithProgress(
                 title = stringResource(id = string.feature_engine_impl_title),
                 progress = progress,
+                actions = {
+                    if (uiState is Success && !isProcessing) {
+                        EngineGlobalActionMenu(
+                            canDisableAllRecommended = uiState.apps.any {
+                                it.enabledRecommendedCount > 0
+                            },
+                            canRestoreAll = uiState.apps.any { it.hasManagedChanges },
+                            onDisableAllRecommended = { showDisableAllRecommendedDialog = true },
+                            onRestoreAll = { showRestoreAllDialog = true },
+                        )
+                    }
+                },
             )
         } else {
             BlockerTopAppBar(
@@ -286,6 +304,30 @@ fun EngineScreen(
         )
     }
 
+    if (showDisableAllRecommendedDialog) {
+        BlockerWarningAlertDialog(
+            title = stringResource(string.feature_engine_impl_disable_all_recommended),
+            text = stringResource(string.feature_engine_impl_disable_all_recommended_confirm),
+            onDismissRequest = { showDisableAllRecommendedDialog = false },
+            onConfirmRequest = {
+                showDisableAllRecommendedDialog = false
+                onDisableAllRecommended()
+            },
+        )
+    }
+
+    if (showRestoreAllDialog) {
+        BlockerWarningAlertDialog(
+            title = stringResource(string.feature_engine_impl_restore_all_defaults),
+            text = stringResource(string.feature_engine_impl_restore_all_defaults_confirm),
+            onDismissRequest = { showRestoreAllDialog = false },
+            onConfirmRequest = {
+                showRestoreAllDialog = false
+                onRestoreAllDefaults()
+            },
+        )
+    }
+
     if (showRestoreDialog && selectedApp != null) {
         BlockerWarningAlertDialog(
             title = stringResource(id = string.feature_engine_impl_restore_changes),
@@ -336,6 +378,29 @@ private fun EngineMoreActionMenu(
         }
         if (canRestore) {
             add(DropDownMenuItem(string.feature_engine_impl_restore_changes, onRestore))
+        }
+    }
+    if (items.isEmpty()) return
+    BlockerAppTopBarMenu(
+        menuIcon = BlockerIcons.MoreVert,
+        menuIconDesc = uiString.core_ui_more_menu,
+        menuList = items,
+    )
+}
+
+@Composable
+private fun EngineGlobalActionMenu(
+    canDisableAllRecommended: Boolean,
+    canRestoreAll: Boolean,
+    onDisableAllRecommended: () -> Unit,
+    onRestoreAll: () -> Unit,
+) {
+    val items = buildList {
+        if (canDisableAllRecommended) {
+            add(DropDownMenuItem(string.feature_engine_impl_disable_all_recommended, onDisableAllRecommended))
+        }
+        if (canRestoreAll) {
+            add(DropDownMenuItem(string.feature_engine_impl_restore_all_defaults, onRestoreAll))
         }
     }
     if (items.isEmpty()) return

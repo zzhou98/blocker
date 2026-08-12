@@ -16,10 +16,10 @@
   -->
 <resources>
     <string name="feature_generalrule_api_sdk_trackers">SDK/跟踪器</string>
-    <string name="feature_generalrule_api_block_all_matched">拦截所有匹配项</string>
-    <string name="feature_generalrule_api_enable_all_matched">启用所有匹配项</string>
-    <string name="feature_generalrule_api_block_all_confirmation">此操作将禁用所有应用中被 SDK/跟踪器规则匹配到的组件。是否继续？</string>
-    <string name="feature_generalrule_api_enable_all_confirmation">此操作将重新启用所有应用中被 SDK/跟踪器规则匹配到的组件。是否继续？</string>
+    <string name="feature_generalrule_api_block_all_matched">阻止本页所有组件</string>
+    <string name="feature_generalrule_api_enable_all_matched">启用本页所有组件</string>
+    <string name="feature_generalrule_api_block_all_confirmation">此操作将阻止当前分类页面中 SDK/跟踪器规则匹配到的所有组件。是否继续？</string>
+    <string name="feature_generalrule_api_enable_all_confirmation">此操作将启用当前分类页面中 SDK/跟踪器规则匹配到的所有组件。是否继续？</string>
     <string name="feature_generalrule_api_category_all">全部</string>
     <string name="feature_generalrule_api_category_advertising">广告</string>
     <string name="feature_generalrule_api_category_analytics">统计</string>

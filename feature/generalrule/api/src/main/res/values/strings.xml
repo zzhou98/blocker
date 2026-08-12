@@ -16,10 +16,10 @@
   -->
 <resources>
     <string name="feature_generalrule_api_sdk_trackers">SDK/Trackers</string>
-    <string name="feature_generalrule_api_block_all_matched">Block all matched</string>
-    <string name="feature_generalrule_api_enable_all_matched">Enable all matched</string>
-    <string name="feature_generalrule_api_block_all_confirmation">This will disable all components matched by SDK/Tracker rules across all apps. Continue?</string>
-    <string name="feature_generalrule_api_enable_all_confirmation">This will re-enable all components matched by SDK/Tracker rules across all apps. Continue?</string>
+    <string name="feature_generalrule_api_block_all_matched">Block components on this page</string>
+    <string name="feature_generalrule_api_enable_all_matched">Enable components on this page</string>
+    <string name="feature_generalrule_api_block_all_confirmation">This will disable components matched by the SDK/Tracker rules on the current category page. Continue?</string>
+    <string name="feature_generalrule_api_enable_all_confirmation">This will re-enable components matched by the SDK/Tracker rules on the current category page. Continue?</string>
     <string name="feature_generalrule_api_category_all">All</string>
     <string name="feature_generalrule_api_category_advertising">Ads</string>
     <string name="feature_generalrule_api_category_analytics">Analytics</string>

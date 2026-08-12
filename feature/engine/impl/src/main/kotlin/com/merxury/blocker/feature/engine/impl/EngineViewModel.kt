@@ -341,6 +341,18 @@ class EngineViewModel @Inject constructor(
         }
     }
 
+    fun disableAllRecommended() = runGlobalControlOperation {
+        catalog.flatMap { it.engines }
+            .filter { it.riskLevel == EngineRiskLevel.SAFE && it.isEnabled }
+            .forEach { engine -> disableEngineInternal(engine) }
+    }
+
+    fun restoreAllDefaults() = runGlobalControlOperation {
+        catalog.map { it.app.packageName }.forEach { packageName ->
+            restoreAllManagedComponents(packageName)
+        }
+    }
+
     /**
      * Persists an app-scoped desired block state. Turning it on also applies the safe rule now;
      * turning it off deliberately keeps current component state untouched, so removing a policy
@@ -508,6 +520,21 @@ class EngineViewModel @Inject constructor(
             } finally {
                 _isProcessing.value = false
             }
+        }
+    }
+
+    private fun runGlobalControlOperation(action: suspend () -> Unit) {
+        if (_isProcessing.value) return
+        selectionRefreshJob?.cancel()
+        controlJob?.cancel()
+        controlJob = viewModelScope.launch(ioDispatcher + exceptionHandler) {
+            _isProcessing.value = true
+            try {
+                action()
+            } finally {
+                _isProcessing.value = false
+            }
+            loadData()
         }
     }
 
