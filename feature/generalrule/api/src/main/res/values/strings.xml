@@ -27,4 +27,5 @@
     <string name="feature_generalrule_api_category_social">Social</string>
     <string name="feature_generalrule_api_category_auth">Login</string>
     <string name="feature_generalrule_api_category_other">Other</string>
+    <string name="feature_generalrule_api_search_hint">Search SDKs, companies, or keywords</string>
 </resources>

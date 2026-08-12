@@ -19,6 +19,7 @@ package com.merxury.blocker.feature.generalrule.impl
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.SnackbarDuration.Short
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -41,6 +42,7 @@ import com.merxury.blocker.core.analytics.LocalAnalyticsHelper
 import com.merxury.blocker.core.designsystem.component.BlockerAppTopBarMenu
 import com.merxury.blocker.core.designsystem.component.BlockerErrorAlertDialog
 import com.merxury.blocker.core.designsystem.component.BlockerScrollableTabRow
+import com.merxury.blocker.core.designsystem.component.BlockerSearchTextField
 import com.merxury.blocker.core.designsystem.component.BlockerTab
 import com.merxury.blocker.core.designsystem.component.BlockerTopAppBarWithProgress
 import com.merxury.blocker.core.designsystem.component.BlockerWarningAlertDialog
@@ -113,6 +115,7 @@ fun GeneralRulesScreen(
     var showBlockAllDialog by rememberSaveable { mutableStateOf(false) }
     var showEnableAllDialog by rememberSaveable { mutableStateOf(false) }
     var selectedCategory by rememberSaveable { mutableStateOf(GeneralRuleCategory.ALL) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
@@ -143,15 +146,24 @@ fun GeneralRulesScreen(
 
             is GeneralRuleUiState.Success -> Column(modifier = Modifier.weight(1F)) {
                 GeneralRuleCategoryTabs(selectedCategory) { selectedCategory = it }
+                BlockerSearchTextField(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { searchQuery = it },
+                    onSearchTrigger = {},
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = {
+                        Text(stringResource(generalruleString.feature_generalrule_api_search_hint))
+                    },
+                )
                 GeneralRulesList(
-                    matchedRules = uiState.matchedRules.filterByCategory(selectedCategory),
-                    unmatchedRules = uiState.unmatchedRules.filterByCategory(selectedCategory),
-                highlightSelectedRule = highlightSelectedRule,
-                selectedRuleId = uiState.selectedRuleId,
-                onClick = { id ->
-                    navigateToRuleDetail(id)
-                    analyticsHelper.logGeneralRuleClicked(id)
-                },
+                    matchedRules = uiState.matchedRules.filterRules(selectedCategory, searchQuery),
+                    unmatchedRules = uiState.unmatchedRules.filterRules(selectedCategory, searchQuery),
+                    highlightSelectedRule = highlightSelectedRule,
+                    selectedRuleId = uiState.selectedRuleId,
+                    onClick = { id ->
+                        navigateToRuleDetail(id)
+                        analyticsHelper.logGeneralRuleClicked(id)
+                    },
                 )
             }
 
@@ -202,6 +214,20 @@ private fun GeneralRuleCategoryTabs(
 
 private fun List<GeneralRule>.filterByCategory(category: GeneralRuleCategory): List<GeneralRule> =
     if (category == GeneralRuleCategory.ALL) this else filter { it.category() == category }
+
+private fun List<GeneralRule>.filterRules(
+    category: GeneralRuleCategory,
+    query: String,
+): List<GeneralRule> = filterByCategory(category).filter { it.matchesQuery(query) }
+
+private fun GeneralRule.matchesQuery(query: String): Boolean {
+    if (query.isBlank()) return true
+    val normalizedQuery = query.trim()
+    return name.contains(normalizedQuery, ignoreCase = true) ||
+        company?.contains(normalizedQuery, ignoreCase = true) == true ||
+        description?.contains(normalizedQuery, ignoreCase = true) == true ||
+        searchKeyword.any { it.contains(normalizedQuery, ignoreCase = true) }
+}
 
 private fun GeneralRuleCategory.labelRes(): Int = when (this) {
     GeneralRuleCategory.ALL -> generalruleString.feature_generalrule_api_category_all

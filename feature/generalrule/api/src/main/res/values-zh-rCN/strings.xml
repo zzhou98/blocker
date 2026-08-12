@@ -27,4 +27,5 @@
     <string name="feature_generalrule_api_category_social">社交</string>
     <string name="feature_generalrule_api_category_auth">登录</string>
     <string name="feature_generalrule_api_category_other">其他</string>
+    <string name="feature_generalrule_api_search_hint">搜索 SDK、厂商或关键词</string>
 </resources>
