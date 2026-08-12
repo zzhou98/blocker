@@ -18,6 +18,7 @@ plugins {
     alias(libs.plugins.blocker.android.feature.impl)
     alias(libs.plugins.blocker.android.library.compose)
     alias(libs.plugins.blocker.android.library.jacoco)
+    alias(libs.plugins.blocker.android.room)
     alias(libs.plugins.roborazzi)
 }
 
@@ -31,6 +32,7 @@ dependencies {
     implementation(projects.core.componentController)
     implementation(projects.core.data)
     implementation(projects.core.domain)
+    implementation(projects.core.database)
     implementation(libs.androidx.activity.compose)
     implementation(libs.coil.kt)
     implementation(libs.coil.kt.compose)

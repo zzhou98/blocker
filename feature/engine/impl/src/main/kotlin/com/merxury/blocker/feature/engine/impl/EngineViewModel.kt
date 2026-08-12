@@ -37,6 +37,8 @@ import com.merxury.blocker.core.result.Result
 import com.merxury.blocker.core.ui.data.UiMessage
 import com.merxury.blocker.core.ui.data.toErrorMessage
 import com.merxury.blocker.core.utils.PackageInfoDataSource
+import com.merxury.blocker.feature.engine.impl.journal.EngineJournalDao
+import com.merxury.blocker.feature.engine.impl.journal.EngineOperationEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -61,6 +63,7 @@ class EngineViewModel @Inject constructor(
     private val searchGeneralRule: SearchGeneralRuleUseCase,
     private val packageInfoDataSource: PackageInfoDataSource,
     private val backupStore: EngineBackupStore,
+    private val journalDao: EngineJournalDao,
     private val userDataRepository: UserDataRepository,
     @RootApiControl private val pmController: IController,
     @IfwControl private val ifwController: IController,
@@ -476,6 +479,17 @@ class EngineViewModel @Inject constructor(
         }
 
         if (requests.isNotEmpty()) {
+            // Persist an intent before changing Android state. An unfinished entry is deliberately
+            // retained after a controller failure so a later Engine session can recover safely.
+            val operationId = journalDao.insertOperation(
+                EngineOperationEntity(
+                    packageName = packageName,
+                    ruleId = ruleId,
+                    action = "BLOCK",
+                    status = "RUNNING",
+                    componentCount = requests.size,
+                ),
+            )
             val outcome = disableRequestsAndRead(packageName, requests)
             val failedRequests = requests.filter { request ->
                 val updated = outcome.components[request.component.name]
@@ -527,6 +541,11 @@ class EngineViewModel @Inject constructor(
                 }
             }
             if (failedRequests.isNotEmpty()) {
+                journalDao.updateOperation(
+                    id = operationId,
+                    completedCount = requests.size - failedRequests.size,
+                    status = "INTERRUPTED",
+                )
                 Timber.w(
                     "Engine did not disable ${failedRequests.size} requested controller layers; " +
                         "rollback was attempted and unresolved restore records were retained",
@@ -536,6 +555,13 @@ class EngineViewModel @Inject constructor(
                     IllegalStateException(
                         "Unable to disable ${failedRequests.size} Engine component(s)",
                     ),
+                )
+            }
+            if (failedRequests.isEmpty()) {
+                journalDao.updateOperation(
+                    id = operationId,
+                    completedCount = requests.size,
+                    status = "COMPLETED",
                 )
             }
             failure?.let { throw it }
