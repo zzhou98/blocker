@@ -22,6 +22,12 @@ enum class EngineRiskLevel {
     HIGH_RISK,
 }
 
+enum class EnginePolicyScope {
+    NONE,
+    PACKAGE,
+    GLOBAL,
+}
+
 data class EngineAppItem(
     val app: AppItem,
     val engines: List<EngineRuleItem>,
@@ -46,6 +52,7 @@ data class EngineRuleItem(
     val components: List<ComponentInfo>,
     val hasManagedChanges: Boolean = false,
     val hasPersistentPolicy: Boolean = false,
+    val persistentPolicyScope: EnginePolicyScope = EnginePolicyScope.NONE,
 ) {
     val blockedCount: Int
         get() = components.count { !it.enabled() }

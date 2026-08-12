@@ -92,6 +92,8 @@ interface EngineJournalDao {
     @Query("DELETE FROM engine_policy WHERE scope = :scope AND packageName = :packageName AND ruleId = :ruleId")
     suspend fun deletePolicy(scope: String, packageName: String, ruleId: Int)
 
+    // Package rows are returned first so associateBy() keeps the global row as the effective
+    // policy whenever both exist for the same SDK.
     @Query("SELECT * FROM engine_policy WHERE (scope = 'GLOBAL' OR packageName = :packageName) AND mode = 'BLOCK' ORDER BY scope DESC")
     suspend fun blockingPolicies(packageName: String): List<EnginePolicyEntity>
 

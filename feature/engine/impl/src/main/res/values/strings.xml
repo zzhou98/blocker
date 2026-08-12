@@ -18,6 +18,7 @@
     <string name="feature_engine_impl_high_risk_confirm">This match includes a core Android component. Disabling it can break app startup, accounts, VPN, accessibility, notification access, or app data. Continue?</string>
     <string name="feature_engine_impl_component_summary">%1$d SDKs · %2$d components · Service %3$d · Receiver %4$d · Provider %5$d · Activity %6$d</string>
     <string name="feature_engine_impl_persistent_policy">Keep blocked</string>
+    <string name="feature_engine_impl_global_persistent_policy">Keep blocked in all apps</string>
     <string name="feature_engine_impl_force_enable_confirm">Engine has no restore record for this rule. Continuing will enable matched components that are currently blocked outside Engine, except components still owned by another Engine rule. This may override manual blocks made elsewhere. Continue?</string>
     <string name="feature_engine_impl_disable_recommended_confirm">Disable %2$d rules marked safe to block in %1$s? Rules without a safe-to-block mark will not be changed.</string>
     <string name="feature_engine_impl_restore_confirm">Restore only the component states changed by Engine for %1$s? Existing blocks that predate Engine will be preserved.</string>

@@ -117,6 +117,7 @@ fun EngineScreen(
         onDisableRecommended = viewModel::disableRecommended,
         onRestoreManagedChanges = viewModel::restoreManagedChanges,
         onPersistentPolicyChange = viewModel::setPersistentPolicy,
+        onGlobalPersistentPolicyChange = viewModel::setGlobalPersistentPolicy,
     )
 
     if (errorState != null) {
@@ -142,6 +143,7 @@ fun EngineScreen(
     onDisableRecommended: (String) -> Unit = {},
     onRestoreManagedChanges: (String) -> Unit = {},
     onPersistentPolicyChange: (String, Int, Boolean) -> Unit = { _, _, _ -> },
+    onGlobalPersistentPolicyChange: (Int, Boolean) -> Unit = { _, _ -> },
 ) {
     val selectedPackageName = selectedApp?.app?.packageName
     var unsafeRuleId by rememberSaveable(selectedPackageName) { mutableStateOf<Int?>(null) }
@@ -228,6 +230,7 @@ fun EngineScreen(
                                     enabled,
                                 )
                             },
+                            onGlobalPersistentPolicyChange = onGlobalPersistentPolicyChange,
                         )
                     }
                 }
@@ -435,6 +438,7 @@ private fun EngineRuleList(
     isProcessing: Boolean,
     onToggle: (EngineRuleItem, Boolean) -> Unit,
     onPersistentPolicyChange: (EngineRuleItem, Boolean) -> Unit,
+    onGlobalPersistentPolicyChange: (Int, Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val recommended = appItem.engines.filter { it.riskLevel == EngineRiskLevel.SAFE }
@@ -459,6 +463,7 @@ private fun EngineRuleList(
                         isProcessing = isProcessing,
                         onToggle = onToggle,
                         onPersistentPolicyChange = onPersistentPolicyChange,
+                        onGlobalPersistentPolicyChange = onGlobalPersistentPolicyChange,
                     )
                 }
             }
@@ -477,6 +482,7 @@ private fun EngineRuleList(
                         isProcessing = isProcessing,
                         onToggle = onToggle,
                         onPersistentPolicyChange = onPersistentPolicyChange,
+                        onGlobalPersistentPolicyChange = onGlobalPersistentPolicyChange,
                     )
                 }
             }
@@ -491,6 +497,7 @@ private fun EngineRuleList(
                         isProcessing = isProcessing,
                         onToggle = onToggle,
                         onPersistentPolicyChange = onPersistentPolicyChange,
+                        onGlobalPersistentPolicyChange = onGlobalPersistentPolicyChange,
                     )
                 }
             }
@@ -517,6 +524,7 @@ private fun EngineRuleItemRow(
     isProcessing: Boolean,
     onToggle: (EngineRuleItem, Boolean) -> Unit,
     onPersistentPolicyChange: (EngineRuleItem, Boolean) -> Unit,
+    onGlobalPersistentPolicyChange: (Int, Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -557,11 +565,19 @@ private fun EngineRuleItemRow(
             )
             if (engine.riskLevel == EngineRiskLevel.SAFE) {
                 BlockerFilterChip(
-                    selected = engine.hasPersistentPolicy,
+                    selected = engine.persistentPolicyScope == EnginePolicyScope.PACKAGE,
                     onSelectedChange = { onPersistentPolicyChange(engine, it) },
-                    enabled = !isProcessing,
+                    enabled = !isProcessing && engine.persistentPolicyScope != EnginePolicyScope.GLOBAL,
                     label = {
                         Text(stringResource(id = string.feature_engine_impl_persistent_policy))
+                    },
+                )
+                BlockerFilterChip(
+                    selected = engine.persistentPolicyScope == EnginePolicyScope.GLOBAL,
+                    onSelectedChange = { onGlobalPersistentPolicyChange(engine.rule.id, it) },
+                    enabled = !isProcessing,
+                    label = {
+                        Text(stringResource(id = string.feature_engine_impl_global_persistent_policy))
                     },
                 )
             }

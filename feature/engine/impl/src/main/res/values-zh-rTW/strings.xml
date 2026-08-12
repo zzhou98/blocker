@@ -18,6 +18,7 @@
     <string name="feature_engine_impl_high_risk_confirm">此相符項包含 Android 核心進入點元件。關閉後可能導致應用程式無法啟動、帳號、VPN、無障礙、通知存取或應用程式資料異常，是否繼續？</string>
     <string name="feature_engine_impl_component_summary">%1$d 個 SDK · %2$d 個元件 · 服務 %3$d · 廣播 %4$d · 內容供應器 %5$d · Activity %6$d</string>
     <string name="feature_engine_impl_persistent_policy">持續封鎖</string>
+    <string name="feature_engine_impl_global_persistent_policy">所有應用持續封鎖</string>
     <string name="feature_engine_impl_force_enable_confirm">「引擎」沒有此規則的還原記錄。繼續後，只會啟用目前未被其他「引擎」規則管理、但已關閉的相符元件；這可能覆蓋你在其他頁面手動進行的停用。是否繼續？</string>
     <string name="feature_engine_impl_disable_recommended_confirm">關閉 %1$s 中 %2$d 個明確標示為可安全關閉的項目？未標示為安全的項目不會被修改。</string>
     <string name="feature_engine_impl_restore_confirm">僅還原「引擎」曾為 %1$s 修改過的元件狀態；使用「引擎」前已有的停用狀態會被保留。是否繼續？</string>

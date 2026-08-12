@@ -194,9 +194,9 @@ class EngineViewModel @Inject constructor(
             }
 
             val appByPackage = apps.associateBy { it.packageName }
-            val policyRuleIdsByPackage = apps.associate { app ->
+            val policiesByPackage = apps.associate { app ->
                 app.packageName to journalDao.blockingPolicies(app.packageName)
-                    .mapTo(mutableSetOf()) { it.ruleId }
+                    .associateBy { it.ruleId }
             }
             val matchedRulesByPackage = mutableMapOf<String, MutableList<EngineRuleItem>>()
             val total = rules.size.coerceAtLeast(1)
@@ -218,7 +218,11 @@ class EngineViewModel @Inject constructor(
                                     hasManagedChanges = backupStore
                                         .ownedComponentNames(packageName, rule.id)
                                         .isNotEmpty(),
-                                    hasPersistentPolicy = rule.id in policyRuleIdsByPackage[packageName].orEmpty(),
+                                    hasPersistentPolicy = rule.id in policiesByPackage[packageName].orEmpty(),
+                                    persistentPolicyScope = policiesByPackage[packageName]
+                                        ?.get(rule.id)
+                                        ?.scope
+                                        .toEnginePolicyScope(),
                                 ),
                             )
                     }
@@ -249,6 +253,7 @@ class EngineViewModel @Inject constructor(
                     )
                 }
             }
+            applyPersistentPolicies()
             val ruleHash = generalRuleRepository.getRuleHash().first()
             catalog.forEach { appItem ->
                 val componentHash = appItem.engines
@@ -362,6 +367,43 @@ class EngineViewModel @Inject constructor(
                 }
             } else {
                 journalDao.deletePolicy("PACKAGE", packageName, ruleId)
+            }
+        }
+    }
+
+    fun setGlobalPersistentPolicy(ruleId: Int, enabled: Boolean) {
+        if (_isProcessing.value) return
+        selectionRefreshJob?.cancel()
+        controlJob?.cancel()
+        controlJob = viewModelScope.launch(ioDispatcher + exceptionHandler) {
+            _isProcessing.value = true
+            try {
+                if (enabled) {
+                    journalDao.upsertPolicy(
+                        EnginePolicyEntity(
+                            scope = "GLOBAL",
+                            packageName = "",
+                            ruleId = ruleId,
+                            mode = "BLOCK",
+                            autoApply = true,
+                        ),
+                    )
+                    // Global policies are intentionally limited to the same safe tier used by
+                    // bulk blocking. Core entry points always retain explicit user confirmation.
+                    catalog.flatMap { it.engines }
+                        .filter {
+                            it.rule.id == ruleId &&
+                                it.riskLevel == EngineRiskLevel.SAFE &&
+                                it.isEnabled
+                        }
+                        .forEach { disableEngineInternal(it) }
+                } else {
+                    journalDao.deletePolicy("GLOBAL", "", ruleId)
+                }
+            } finally {
+                _isProcessing.value = false
+                // Rebuild policy scope labels for every affected app after the global change.
+                loadData()
             }
         }
     }
@@ -857,8 +899,7 @@ class EngineViewModel @Inject constructor(
         val currentByName = componentRepository.getComponentList(packageName)
             .first()
             .associateBy { it.name }
-        val policyRuleIds = journalDao.blockingPolicies(packageName)
-            .mapTo(mutableSetOf()) { it.ruleId }
+        val policies = journalDao.blockingPolicies(packageName).associateBy { it.ruleId }
 
         catalog = catalog.mapNotNull { appItem ->
             if (appItem.app.packageName != packageName) return@mapNotNull appItem
@@ -872,7 +913,10 @@ class EngineViewModel @Inject constructor(
                         hasManagedChanges = backupStore
                             .ownedComponentNames(packageName, engine.rule.id)
                             .isNotEmpty(),
-                        hasPersistentPolicy = engine.rule.id in policyRuleIds,
+                        hasPersistentPolicy = engine.rule.id in policies,
+                        persistentPolicyScope = policies[engine.rule.id]
+                            ?.scope
+                            .toEnginePolicyScope(),
                     )
                 }
             }
@@ -895,6 +939,36 @@ class EngineViewModel @Inject constructor(
             selectApp(null)
         }
         _uiState.emit(EngineUiState.Success(catalog))
+    }
+
+    /**
+     * Re-applies only desired safe rules that Android currently reports as enabled. This makes
+     * policies survive a package upgrade or a newly installed app without repeatedly issuing
+     * controller commands for components that are already in the desired state.
+     */
+    private suspend fun applyPersistentPolicies() {
+        val affectedPackages = linkedSetOf<String>()
+        catalog.flatMap { it.engines }
+            .filter {
+                it.hasPersistentPolicy &&
+                    it.riskLevel == EngineRiskLevel.SAFE &&
+                    it.isEnabled
+            }
+            .forEach { engine ->
+                try {
+                    disableEngineInternal(engine)
+                    engine.components.firstOrNull()?.packageName?.let(affectedPackages::add)
+                } catch (throwable: Throwable) {
+                    if (throwable is CancellationException) throw throwable
+                    // A policy failure must not hide the whole Engine catalog. The durable
+                    // operation journal and restore records still preserve enough information to
+                    // retry safely when the user returns after fixing controller permissions.
+                    Timber.w(throwable, "Unable to re-apply persistent Engine policy ${engine.rule.id}")
+                }
+            }
+        affectedPackages.forEach { packageName ->
+            refreshPackage(packageName)
+        }
     }
 
     private fun mergeFailure(current: Throwable?, next: Throwable?): Throwable? = when {
@@ -921,6 +995,12 @@ class EngineViewModel @Inject constructor(
         .firstOrNull { it.app.packageName == packageName }
         ?.engines
         ?.firstOrNull { it.rule.id == ruleId }
+
+    private fun String?.toEnginePolicyScope(): EnginePolicyScope = when (this) {
+        "GLOBAL" -> EnginePolicyScope.GLOBAL
+        "PACKAGE" -> EnginePolicyScope.PACKAGE
+        else -> EnginePolicyScope.NONE
+    }
 
     private data class ControllerRequest(
         val component: ComponentInfo,
